@@ -202,7 +202,18 @@ namespace ServerWater2.Controllers
         [Route("getListUser")]
         public IActionResult GetListUser([FromHeader] string token)
         {
-            long id = Program.api_user.checkSystem(token);
+            //Khong chan user nua
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                return Ok(Program.api_user.listUserByGroup(token));
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+            /*long id = Program.api_user.checkSystem(token);
             if (id >= 0)
             {
                 return Ok(Program.api_user.listUser(token));
@@ -210,7 +221,7 @@ namespace ServerWater2.Controllers
             else
             {
                 return Unauthorized();
-            }
+            }*/
         }
 
         [HttpGet]

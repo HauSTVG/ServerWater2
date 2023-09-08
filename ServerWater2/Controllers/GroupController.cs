@@ -102,7 +102,7 @@ namespace ServerWater2.Controllers
         [Route("getListGroup")]
         public IActionResult GetListGroup([FromHeader] string token)
         {
-            long id = Program.api_user.checkSystem(token);
+            long id = Program.api_user.checkUser(token);
             if (id >= 0)
             {
                 return Ok(Program.api_group.getListGroup());
@@ -111,13 +111,23 @@ namespace ServerWater2.Controllers
             {
                 return Unauthorized();
             }
+
+            /*long id = Program.api_user.checkSystem(token);
+            if (id >= 0)
+            {
+                return Ok(Program.api_group.getListGroup());
+            }
+            else
+            {
+                return Unauthorized();
+            }*/
         }
 
         [HttpGet]
         [Route("{code}/getListArea")]
         public IActionResult GetListArea([FromHeader] string token, string code)
         {
-            long id = Program.api_user.checkSystem(token);
+            long id = Program.api_user.checkUser(token);
             if (id >= 0)
             {
                 return Ok(Program.api_group.getListArea(code));
@@ -126,6 +136,16 @@ namespace ServerWater2.Controllers
             {
                 return Unauthorized();
             }
+
+            /*long id = Program.api_user.checkSystem(token);
+            if (id >= 0)
+            {
+                return Ok(Program.api_group.getListArea(code));
+            }
+            else
+            {
+                return Unauthorized();
+            }*/
         }
 
         public class ItemHttpArea

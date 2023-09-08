@@ -263,6 +263,7 @@ namespace ServerWater2.APIs
         public class GroupItem {
             public string code { get; set; } = "";
             public string name { get; set; } = "";
+            public string des { get; set; } = "";
         }
 
         public class InfoUserSystem
@@ -563,7 +564,73 @@ namespace ServerWater2.APIs
                 return items;
             }
         }
-      
+
+        public List<ItemUser> listUserByGroup(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return new List<ItemUser>();
+            }
+            using (DataContext context = new DataContext())
+            {
+                SqlUser? own_user = context.users!.Where(s => s.isdeleted == false && s.token.CompareTo(token) == 0)
+                    .Include(s => s.role)
+                    .Include(s => s.groups)
+                    .FirstOrDefault();
+                if (own_user == null)
+                {
+                    return new List<ItemUser>();
+                }
+                List<SqlUser> users = new List<SqlUser>();
+
+                if (own_user.role!.code.CompareTo("admin") == 0)
+                {
+                    users = context.users!.Where(s => s.isdeleted == false)
+                        .Include(s => s.groups)
+                        .Include(s => s.role).ToList();
+                }
+                else
+                {
+                    List<string> groups = own_user?.groups?.Select(s => s.code).ToList();
+                    if (groups == null || groups.Count() < 1) return new List<ItemUser>();
+
+                    users = context.users!.Include(s => s.role).Include(s => s.groups)
+                        .Where(s => s.isdeleted == false 
+                            && s.role!.code.CompareTo("admin") != 0
+                            && s.groups.Any(s => groups.Contains(s.code)))
+                        .Include(s => s.role).ToList();
+                }
+
+                List<ItemUser> items = new List<ItemUser>();
+                foreach (SqlUser user in users)
+                {
+                    ItemUser item = new ItemUser();
+                    item.user = user.user;
+                    item.username = user.username;
+                    item.des = user.des;
+                    item.displayName = user.displayName;
+                    item.numberPhone = user.phoneNumber;
+                    item.avatar = user.avatar;
+                    item.role = user.role!.name;
+
+                    List<GroupItem> grps = new List<GroupItem>();
+                    foreach (var x in user.groups)
+                    {
+                        GroupItem grp = new GroupItem();
+                        grp.code = x.code;
+                        grp.name = x.name;
+                        grp.des = x.des;
+
+                        grps.Add(grp);
+                    }
+                    item.groups = grps;
+
+                    items.Add(item);
+                }
+                return items;
+            }
+        }
+
         public async Task<string> setAvatar(string token, byte[] file)
         {
             if (string.IsNullOrEmpty(token))
