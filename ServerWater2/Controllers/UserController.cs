@@ -287,5 +287,23 @@ namespace ServerWater2.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("getGroupsByUser")]
+        public IActionResult GetGroupsByUser([FromHeader] string token)
+        {
+            //Khong chan user nua
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                return Ok(Program.api_user.getGroupsByUser(token));
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+
+        }
+
     }
 }

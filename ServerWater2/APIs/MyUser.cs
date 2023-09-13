@@ -272,7 +272,7 @@ namespace ServerWater2.APIs
             public string token { get; set; } = "";
             public string role { get; set; } = "";
 
-            public List<GroupItem> groups { get; set; }
+            //public List<GroupItem> groups { get; set; }
         }
 
         public InfoUserSystem login(string username, string password)
@@ -293,7 +293,7 @@ namespace ServerWater2.APIs
                 info.token = user.token;
                 info.role = user.role!.code;
 
-                var grps = new List<GroupItem>();
+               /* var grps = new List<GroupItem>();
                 foreach (var x in user.groups) {
                     GroupItem grp = new GroupItem();
                     grp.code = x.code;
@@ -302,7 +302,7 @@ namespace ServerWater2.APIs
                     grps.Add(grp);
                 }
 
-                info.groups = grps;
+                info.groups = grps;*/
 
                 return info;
             }
@@ -771,6 +771,31 @@ namespace ServerWater2.APIs
 
                 return rows > 0;
             }
+        }
+
+        public List<GroupItem> getGroupsByUser(string token) {
+            List<GroupItem> ret = new List<GroupItem>();
+
+            using (DataContext context = new DataContext()) {
+                SqlUser? user = context.users?.Where(s => !s.isdeleted && s.token.CompareTo(token) == 0)
+                    .Include(s => s.groups)
+                    .FirstOrDefault();
+                if (user == null) return ret;
+
+                if (user.groups != null) {
+                    user.groups.ForEach(x =>
+                    {
+                        GroupItem item = new GroupItem();
+                        item.code = x.code;
+                        item.des = x.des;
+                        item.name = x.name;
+
+                        ret.Add(item);
+                    });
+                }
+            }
+
+            return ret;
         }
     }
 }
